@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1017315217454",
+    "firebase_url": "https://messageapp-d3bd2.firebaseio.com",
+    "project_id": "messageapp-d3bd2",
+    "storage_bucket": "messageapp-d3bd2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017315217454:android:d0e0709ecad9cf6d33cfbf",
+        "android_client_info": {
+          "package_name": "com.fatihb.messageapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1017315217454-8778bda44ki0s3jfbhrv51rm1f4aennd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCG5arhMgQwwsPvc_gKz15B3ODs-TRE0Tw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1017315217454-8778bda44ki0s3jfbhrv51rm1f4aennd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
