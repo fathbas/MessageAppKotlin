@@ -51,6 +51,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database-ktx:19.4.0'
  //   implementation 'com.google.firebase:firebase-firestore-ktx:21.6.0'
  //   implementation 'com.google.android.gms:play-services-auth:18.1.0'
+    implementation 'com.theartofdev.edmodo:android-image-cropper:2.6.0'
 
     implementation 'com.google.firebase:firebase-storage-ktx:19.2.0'
 

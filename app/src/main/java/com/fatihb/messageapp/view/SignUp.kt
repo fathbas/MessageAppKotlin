@@ -4,9 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
@@ -24,6 +22,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
+import com.theartofdev.edmodo.cropper.CropImage
+import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.fragment_sign_up.*
 import java.util.*
 
@@ -41,6 +41,12 @@ class SignUp : Fragment() {
     ): View? {
 
         auth = FirebaseAuth.getInstance()
+
+        if (auth.currentUser != null){
+            val intent = Intent(context,ChatListAndProfileSettings::class.java)
+            startActivity(intent)
+            requireActivity().finish()
+        }
 
         return inflater.inflate(R.layout.fragment_sign_up, container, false)
     }
@@ -78,16 +84,10 @@ class SignUp : Fragment() {
         }
 
         imageView.setOnClickListener {
-            //take photo from gallery and save database for user
-//            val intent = Intent(Intent.ACTION_PICK)
-////            intent.type= "image/*"
-////            startActivityForResult(intent,0)
-
             if (context?.let { it1 -> ContextCompat.checkSelfPermission(it1, Manifest.permission.READ_EXTERNAL_STORAGE) } != PackageManager.PERMISSION_GRANTED){
                 activity?.let { it1 -> ActivityCompat.requestPermissions(it1, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),1) }
             }else{
-                val intent = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                startActivityForResult(intent,2)
+                context?.let { it1 -> CropImage.startPickImageActivity(it1,this) }
             }
 
         }
@@ -100,31 +100,39 @@ class SignUp : Fragment() {
     ) {
         if (requestCode == 1){
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                val intent = Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                startActivityForResult(intent,2)
+                context?.let { it1 -> CropImage.startPickImageActivity(it1,this) }
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 2 && resultCode == Activity.RESULT_OK && data != null){
-             selectedUri = data.data
+       if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE && resultCode == Activity.RESULT_OK){
+           val imageUri = context?.let { CropImage.getPickImageResultUri(it,data)}
+           if (CropImage.isReadExternalStoragePermissionsRequired(requireContext(), imageUri!!)){
+               selectedUri = imageUri
+               requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),0)
+           }else{
+               startCrop(imageUri)
+           }
+       }
 
-            try {
-                if (Build.VERSION.SDK_INT >= 28){
-                    val source = ImageDecoder.createSource(activity?.contentResolver!!, selectedUri!!)
-                    val bitmap = ImageDecoder.decodeBitmap(source)
-                    circleImage.setImageBitmap(bitmap)
-                }else{
-                    val bitmap = MediaStore.Images.Media.getBitmap(activity?.contentResolver,selectedUri)
-                    circleImage.setImageBitmap(bitmap)
-                }
-            }catch (e: Exception){
-                e.printStackTrace()
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
+            val result = CropImage.getActivityResult(data)
+            if (resultCode == Activity.RESULT_OK){
+                selectedUri = result.uri
+                circleImage.setImageURI(selectedUri)
+                circleImage.alpha = 1f
             }
-            circleImage.alpha = 1f
+        }
+    }
+
+    private fun startCrop(uri: Uri){
+        context?.let {
+            CropImage.activity(uri)
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .setMultiTouchEnabled(true)
+                .start(it,this)
         }
     }
 

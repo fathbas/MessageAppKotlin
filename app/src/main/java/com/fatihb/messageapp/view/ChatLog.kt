@@ -29,7 +29,7 @@ class ChatLog : AppCompatActivity() {
         supportActionBar?.title = user?.name+" "+user?.surname
 
         allChatMessage = arrayListOf()
-        adapter = ChatLogAdapter(allChatMessage,null,null)
+        adapter = ChatLogAdapter(allChatMessage,"","")
 
         val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this@ChatLog)
         allMes.layoutManager = layoutManager
@@ -56,7 +56,7 @@ class ChatLog : AppCompatActivity() {
                     if (currentUser != null){
                         if (receiverUser != null){
                             allChatMessage.add(chatMessage)
-                            adapter = ChatLogAdapter(allChatMessage,currentUser,receiverUser)
+                            adapter = ChatLogAdapter(allChatMessage,currentUser.profilePicture,receiverUser.profilePicture)
                             allMes.adapter = adapter
                         }
                     }
