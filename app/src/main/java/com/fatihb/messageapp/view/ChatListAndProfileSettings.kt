@@ -5,20 +5,19 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.DividerItemDecoration
 import com.fatihb.messageapp.R
-import com.fatihb.messageapp.adapter.ChatListAdapter
-import com.fatihb.messageapp.model.MessagesModel
+import com.fatihb.messageapp.adapter.ViewPagerAdapter
 import com.fatihb.messageapp.model.UserModel
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_chat_list_and_profile_settings.*
 
 class ChatListAndProfileSettings : AppCompatActivity() {
 
-    private lateinit var adapter: ChatListAdapter
-    private lateinit var latestAllMess: ArrayList<MessagesModel>
-    private lateinit var fromId: String
+
 
     companion object{
         var currentUser: UserModel? = null
@@ -29,50 +28,26 @@ class ChatListAndProfileSettings : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_list_and_profile_settings)
 
-        latestAllMess = arrayListOf()
+        val chatFrag = Chats()
+        val profileFragment = Profile()
 
-        latestAllMes.addItemDecoration(DividerItemDecoration(this,
-        DividerItemDecoration.VERTICAL))
+        tabLayout.setupWithViewPager(slider)
 
-        listenForLatestMessages()
+        val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager,0)
+
+        viewPagerAdapter.addFragment(chatFrag,"Chats")
+        viewPagerAdapter.addFragment(profileFragment,"Profile")
+        slider.adapter = viewPagerAdapter
+        tabLayout.getTabAt(0)?.setIcon(android.R.drawable.sym_action_chat)
+        tabLayout.getTabAt(1)?.setIcon(android.R.drawable.ic_menu_myplaces)
+
         fetchCurrentUser()
     }
 
-    private fun listenForLatestMessages(){
-        fromId = FirebaseAuth.getInstance().uid!!
-        val ref = FirebaseDatabase.getInstance().getReference("latest-messages/$fromId")
 
-        ref.addChildEventListener(object : ChildEventListener{
-            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                val chatMessage = snapshot.getValue(MessagesModel::class.java)
-                if (chatMessage != null){
-                    latestAllMess.add(chatMessage)
-                    adapter = ChatListAdapter(latestAllMess)
-                    latestAllMes.adapter = adapter
-                }
-            }
-            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                val chatMessage = snapshot.getValue(MessagesModel::class.java)
-                if (chatMessage != null){
-                    latestAllMess.add(chatMessage)
-                    adapter = ChatListAdapter(latestAllMess)
-                    latestAllMes.adapter = adapter
-                }
-            }
-            override fun onChildRemoved(snapshot: DataSnapshot) {
-
-            }
-            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-
-            }
-            override fun onCancelled(error: DatabaseError) {
-
-            }
-        })
-    }
 
     private fun fetchCurrentUser(){
-        fromId = FirebaseAuth.getInstance().uid!!
+        val fromId = FirebaseAuth.getInstance().uid!!
         val ref = FirebaseDatabase.getInstance().getReference("users/$fromId")
         ref.addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
